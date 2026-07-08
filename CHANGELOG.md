@@ -16,6 +16,12 @@ Group changes under: **Added**, **Changed**, **Fixed**, **Removed**.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-08
+
+### Added
+- `CHANGELOG.md`, and automatic release notes — each version tag now publishes with its
+  changelog section filled into the GitHub Release automatically.
+
 ## [0.1.2] - 2026-07-08
 
 ### Added
