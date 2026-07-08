@@ -24,7 +24,8 @@ asarUnpack:
 win:
   target:
     - nsis
-  artifactName: ${productName}-${version}-setup.${ext}
+  # Stable (version-less) name so /releases/latest/download links never break.
+  artifactName: ${productName}-setup.${ext}
 
 nsis:
   oneClick: false
@@ -37,7 +38,8 @@ mac:
   target:
     - dmg
   category: public.app-category.business
-  artifactName: ${productName}-${version}.${ext}
+  # Stable (version-less) name so /releases/latest/download links never break.
+  artifactName: ${productName}.${ext}
 
 linux:
   target:

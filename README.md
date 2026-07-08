@@ -5,6 +5,22 @@ table. Built with Electron + Vue 3, styled per `DESIGN.md`.
 
 Project / package / repository name: **tianxing-dispatch**.
 
+## Download
+
+Get the latest installer for your operating system — these links always point to the
+newest release:
+
+| System | Download |
+|--------|----------|
+| **Windows** | [⬇ Download for Windows (.exe)](https://github.com/rakharamadhana/tianxing-dispatch/releases/latest/download/tianxing-dispatch-setup.exe) |
+| **macOS** | [⬇ Download for macOS (.dmg)](https://github.com/rakharamadhana/tianxing-dispatch/releases/latest/download/tianxing-dispatch.dmg) |
+
+All versions and changelogs: **[Releases page](https://github.com/rakharamadhana/tianxing-dispatch/releases/latest)**.
+
+**First launch (the app isn't code-signed yet):**
+- **Windows** — if SmartScreen warns, click **More info → Run anyway**.
+- **macOS** — right-click the app → **Open** the first time (Gatekeeper blocks unsigned apps by default).
+
 ## Features (v0.1)
 
 - Editable job grid: date/time, customer, move-in/out addresses, unit price,
