@@ -1,15 +1,20 @@
-name: Build installers
+name: Release installers
 
-# Builds BOTH installers. macOS .dmg can only be built on a macOS runner,
-# which is why this uses a build matrix — you do not need a Mac yourself.
+# Builds the Windows (.exe) and macOS (.dmg) installers and attaches them to a
+# GitHub Release. Triggered when you push a version tag like "v0.1.0".
+# macOS installers can only be built on a macOS runner — that's why this uses a
+# build matrix, so you don't need your own Mac.
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch: {}
 
+permissions:
+  contents: write # required to create/update the Release
+
 jobs:
-  build:
+  release:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
@@ -24,18 +29,18 @@ jobs:
 
       - run: npm ci
 
-      - name: Build (Windows)
+      - name: Build the app bundle
+        run: npm run build
+
+      - name: Package & publish Windows installer
         if: matrix.os == 'windows-latest'
-        run: npm run build:win
+        run: npx electron-builder --win nsis --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (macOS)
+      - name: Package & publish macOS installer
         if: matrix.os == 'macos-latest'
-        run: npm run build:mac
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: installer-${{ matrix.os }}
-          path: |
-            release/*.exe
-            release/*.dmg
-          if-no-files-found: ignore
+        run: npx electron-builder --mac dmg --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false # unsigned build; skip signing lookup

@@ -3,6 +3,16 @@ productName: tianxing-dispatch
 directories:
   output: release
   buildResources: build
+
+# Where "electron-builder --publish" uploads the installers.
+# On a v* tag, CI attaches the .exe / .dmg to a GitHub Release for tianxing-dispatch.
+# releaseType "draft" = files upload to a draft release you click "Publish" on.
+# Change to "release" for fully automatic (published immediately).
+publish:
+  provider: github
+  owner: rakharamadhana
+  repo: tianxing-dispatch
+  releaseType: draft
 files:
   - out/**
   - package.json
