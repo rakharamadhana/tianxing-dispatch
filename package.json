@@ -1,6 +1,6 @@
 {
   "name": "tianxing-dispatch",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tianxing Moving Co. dispatch table (出車表) — cross-platform desktop app",
   "main": "out/main/index.js",
   "author": "Tianxing Moving Co.",
