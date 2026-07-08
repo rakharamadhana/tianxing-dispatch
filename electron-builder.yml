@@ -1,0 +1,35 @@
+appId: com.tianxing.dispatch
+productName: tianxing-dispatch
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+# better-sqlite3 is a native module; ship + rebuild it for each target.
+npmRebuild: true
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+mac:
+  target:
+    - dmg
+  category: public.app-category.business
+  artifactName: ${productName}-${version}.${ext}
+
+linux:
+  target:
+    - AppImage
+  category: Office
