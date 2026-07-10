@@ -15,10 +15,15 @@ function toJob(row) {
 
 export class SqliteJobRepository extends JobRepository {
   async list(branch, filters = {}) {
+    console.log('MAIN PROCESS RECEIVED FILTERS:', JSON.stringify(filters))
     const db = getDb()
     const where = ['branch = @branch']
     const params = { branch }
 
+    if (filters.year) {
+      where.push('job_date LIKE @yearQuery')
+      params.yearQuery = `${filters.year}%`
+    }
     if (filters.dateQuery) {
       where.push('job_date LIKE @dateQuery')
       params.dateQuery = `%${filters.dateQuery}%`
@@ -40,9 +45,9 @@ export class SqliteJobRepository extends JobRepository {
       params.paymentStatus = filters.paymentStatus
     }
 
-    const rows = db
-      .prepare(`SELECT * FROM jobs WHERE ${where.join(' AND ')} ORDER BY sort_order ASC, id ASC`)
-      .all(params)
+    const sql = `SELECT * FROM jobs WHERE ${where.join(' AND ')} ORDER BY sort_order ASC, id ASC`
+    console.log('MAIN PROCESS RUNNING SQL:', sql, 'WITH PARAMS:', JSON.stringify(params))
+    const rows = db.prepare(sql).all(params)
     return rows.map(toJob)
   }
 
@@ -105,7 +110,7 @@ export class SqliteJobRepository extends JobRepository {
     })
     tx()
 
-    return this.list(branch)
+    return this.list(branch, payload.filters)
   }
 
   async delete(id) {

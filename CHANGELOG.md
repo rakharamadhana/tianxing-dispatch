@@ -16,6 +16,23 @@ Group changes under: **Added**, **Changed**, **Fixed**, **Removed**.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-07-10
+
+### Added
+- **Year Onboarding Screen**: Intermediate year select view immediately after login.
+- **Year Dropdown**: Scopes database results dynamically between 2024 and the current year.
+- **Settings View**: A new utility view containing theme toggles, locale switchers, support guides, rating stars, and problem report forms.
+- **Extra Large Text size**: Added `xlarge` class to support 18px text layouts.
+- **Current Password check**: Added verification constraints to updateProfile to protect email and password changes.
+- **Danger Zone**: Added account deactivation and data removal.
+
+### Changed
+- **Profile / Settings Separation**: Refactored account details (Email/Password) to a simplified ProfileView, and other options to SettingsView.
+- **Enabled Settings tab**: Wired up the settings tab button on the main branch selector.
+
+### Fixed
+- **Dark Mode consistency**: Inverted top-left logo patch, styled inactive/disabled tab switchers, input boxes, and page navigators.
+
 ## [0.1.3] - 2026-07-08
 
 ### Added

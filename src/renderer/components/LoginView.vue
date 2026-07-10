@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import Icon from './Icon.vue'
 import LangToggle from './LangToggle.vue'
+import ThemeToggle from './ThemeToggle.vue'
 import { useAuth, DEMO_ACCOUNTS, DEMO_PASSWORD } from '../composables/useAuth.js'
 
 const { login } = useAuth()
@@ -27,6 +28,7 @@ function fill(demoEmail) {
 <template>
   <div class="auth-page">
     <div class="auth-lang">
+      <ThemeToggle />
       <LangToggle />
     </div>
 

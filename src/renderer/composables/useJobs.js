@@ -18,7 +18,17 @@ export function useJobs(initialBranch = '台北') {
   const saving = ref(false)
   let baseline = '[]' // JSON snapshot of last-loaded/saved state
 
+  const getInitialYear = () => {
+    const saved = localStorage.getItem('tianxing.selected_year')
+    const current = new Date().getFullYear()
+    if (saved && Number(saved) >= 2024 && Number(saved) <= current) {
+      return saved
+    }
+    return String(current)
+  }
+
   const filters = ref({
+    year: getInitialYear(),
     dateQuery: '',
     phoneQuery: '',
     taxFilter: '',
@@ -70,8 +80,9 @@ export function useJobs(initialBranch = '台北') {
   }
 
   function addRow() {
+    const yearPrefill = filters.value.year || '2026'
     rows.value.push(
-      normalize({ id: '', branch: branch.value, job_date: '', quantity: 1 })
+      normalize({ id: '', branch: branch.value, job_date: yearPrefill, quantity: 1 })
     )
   }
 
@@ -93,7 +104,9 @@ export function useJobs(initialBranch = '台北') {
   }
 
   async function clearFilters() {
+    const activeYear = filters.value.year
     filters.value = {
+      year: activeYear,
       dateQuery: '',
       phoneQuery: '',
       taxFilter: '',
@@ -108,7 +121,8 @@ export function useJobs(initialBranch = '台北') {
     try {
       const persisted = await window.api.jobs.save(branch.value, {
         rows: rows.value.map((r) => ({ ...plain(r), total_price: total(r) })),
-        deletedIds: [...deletedIds.value]
+        deletedIds: [...deletedIds.value],
+        filters: plain(filters.value)
       })
       rows.value = persisted.map(normalize)
       snapshot()

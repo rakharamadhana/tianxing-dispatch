@@ -29,8 +29,15 @@ const utilities = [
 
     <span class="tab-sep"></span>
 
-    <!-- Utility tabs: visible placeholders (wired in a later phase) -->
-    <button v-for="u in utilities" :key="u.key" class="tab disabled" disabled>
+    <!-- Utility tabs: settings is active, others are visible placeholders -->
+    <button
+      v-for="u in utilities"
+      :key="u.key"
+      class="tab"
+      :class="{ disabled: u.key !== 'settings' }"
+      :disabled="u.key !== 'settings'"
+      @click="u.key === 'settings' ? emit('settings') : null"
+    >
       <Icon :name="u.icon" :size="15" /><span>{{ $t('tabs.' + u.key) }}</span>
     </button>
   </div>
