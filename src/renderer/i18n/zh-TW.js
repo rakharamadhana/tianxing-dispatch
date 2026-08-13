@@ -9,6 +9,18 @@ export default {
     新竹: '新竹',
     高雄: '高雄'
   },
+  projectTypes: {
+    搬工: '搬工',
+    包材: '包材',
+    時薪: '時薪'
+  },
+  materialPresets: {
+    紙箱: '紙箱',
+    氣泡布: '氣泡布',
+    膠帶: '膠帶',
+    報紙: '報紙',
+    棉被套: '棉被套'
+  },
   tabs: {
     settings: '設定',
     fuel: '油資',
@@ -21,20 +33,24 @@ export default {
     payroll: '薪資結算',
     prevPage: '上頁',
     nextPage: '下頁',
-    restore: '回復',
-    save: '儲存',
+    undo: '復原',
+    redo: '重做',
     addRow: '新增一筆',
     delete: '刪除',
+    addMaterial: '新增材料',
     langToggle: 'EN'
   },
   columns: {
+    projectType: '種類',
     dateTime: '日期 / 時間',
     namePhone: '名稱 / 電話',
     inOut: '搬入 / 搬出',
-    unitPrice: '單價',
-    quantity: '數量',
+    unitPrice: '單價 / 時薪',
+    quantity: '趟 / 工時',
+    workerCount: '工人數',
     total: '總價',
-    note: '備註'
+    note: '備註',
+    materials: '材料'
   },
   fields: {
     date: '日期',
@@ -43,7 +59,13 @@ export default {
     phone: '電話',
     moveIn: '搬入地址',
     moveOut: '搬出地址',
-    note: '備註'
+    note: '備註',
+    unitPrice: '單價',
+    trips: '趟',
+    rate: '時薪',
+    hours: '工時',
+    workerCount: '工人數',
+    materialQuantity: '數量'
   },
   tax: {
     included: '含稅',
@@ -67,13 +89,16 @@ export default {
     year: '年度'
   },
   status: {
-    unsaved: '尚未儲存的變更',
-    saved: '已儲存',
+    saving: '儲存中…',
+    saved: '所有變更已儲存',
     empty: '本頁沒有資料，點「新增一筆」開始建立。'
   },
   confirm: {
     unsavedTitle: '尚未儲存',
     unsavedBody: '有未儲存的變更，離開將會遺失。'
+  },
+  validation: {
+    materialsRequiredForPackaging: '包材項目至少需要新增一筆材料，請填寫後再儲存'
   },
   auth: {
     title: '登入',
@@ -140,7 +165,7 @@ export default {
     deleteConfirmBody: '您確定要永久刪除此帳號嗎？此操作將無法復原。',
     deleteConfirmYes: '確認刪除',
     deleteConfirmNo: '取消',
-    supportHelpText: '天興派車說明：\n1. 編輯資料：直接於表格內輸入即可更新。\n2. 管理分公司：切換上方分公司頁籤即可管理臺北/新竹/高雄資料。\n3. 儲存變更：編輯後請點擊「儲存」以防資料遺失。',
+    supportHelpText: '天興派車說明：\n1. 編輯資料：直接於表格內輸入即可更新。\n2. 管理分公司：切換上方分公司頁籤即可管理臺北/新竹/高雄資料。\n3. 儲存變更：系統會自動儲存所有變更。可使用右上角「復原／重做」按鈕（或 Ctrl/Cmd+Z）回到本次操作中的先前狀態。',
     supportContactText: '如需系統技術支援，請聯繫：\nEmail: support@fyf.com.tw\n電話: 0982-115-727',
     aboutUsText: '天興搬家出車表系統 (v0.1.4) 提供跨平台派車管理、即時統計結算、分公司報表切換及自動化薪資結算等核心功能。',
     termsText: '隱私說明：本系統所有出車資料及設定皆儲存於您本機的 SQLite 資料庫中，絕不自動傳輸至外部伺服器。',
@@ -149,5 +174,21 @@ export default {
     reportPlaceholder: '請詳細描述您遇到的問題或反饋，我們將會盡快處理...',
     reportSubmit: '送出回報',
     langSelect: '顯示語言'
+  },
+  maintenance: {
+    title: '保養紀錄',
+    back: '返回出車表',
+    columns: {
+      dateTime: '日期 / 時間',
+      driverName: '司機',
+      amount: '金額',
+      description: '說明'
+    },
+    fields: {
+      dateTime: '例如 2026-01-15 09:30',
+      driverName: '司機姓名',
+      amount: '金額',
+      description: '說明'
+    }
   }
 }

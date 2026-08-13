@@ -9,6 +9,18 @@ export default {
     新竹: 'Hsinchu',
     高雄: 'Kaohsiung'
   },
+  projectTypes: {
+    搬工: 'Moving',
+    包材: 'Packaging',
+    時薪: 'Hourly'
+  },
+  materialPresets: {
+    紙箱: 'Box',
+    氣泡布: 'Bubble wrap',
+    膠帶: 'Tape',
+    報紙: 'Newspaper',
+    棉被套: 'Quilt cover'
+  },
   tabs: {
     settings: 'Settings',
     fuel: 'Fuel',
@@ -21,20 +33,24 @@ export default {
     payroll: 'Payroll',
     prevPage: 'Prev',
     nextPage: 'Next',
-    restore: 'Restore',
-    save: 'Save',
+    undo: 'Undo',
+    redo: 'Redo',
     addRow: 'Add row',
     delete: 'Delete',
+    addMaterial: 'Add material',
     langToggle: '中文'
   },
   columns: {
+    projectType: 'Type',
     dateTime: 'Date / Time',
     namePhone: 'Name / Phone',
     inOut: 'Move in / Move out',
-    unitPrice: 'Unit price',
-    quantity: 'Qty',
+    unitPrice: 'Price / Rate',
+    quantity: 'Trips / Hours',
+    workerCount: 'Workers',
     total: 'Total',
-    note: 'Note'
+    note: 'Note',
+    materials: 'Materials'
   },
   fields: {
     date: 'Date',
@@ -43,7 +59,13 @@ export default {
     phone: 'Phone',
     moveIn: 'Move-in address',
     moveOut: 'Move-out address',
-    note: 'Note'
+    note: 'Note',
+    unitPrice: 'Unit price',
+    trips: 'Trips',
+    rate: 'Hourly rate',
+    hours: 'Hours',
+    workerCount: 'Workers',
+    materialQuantity: 'Qty'
   },
   tax: {
     included: 'Tax incl.',
@@ -67,13 +89,16 @@ export default {
     year: 'Year'
   },
   status: {
-    unsaved: 'Unsaved changes',
-    saved: 'Saved',
+    saving: 'Saving…',
+    saved: 'All changes saved',
     empty: 'No records on this page. Click "Add row" to start.'
   },
   confirm: {
     unsavedTitle: 'Unsaved changes',
     unsavedBody: 'You have unsaved changes that will be lost if you leave.'
+  },
+  validation: {
+    materialsRequiredForPackaging: 'At least one material is required for Packaging rows — please add one before saving'
   },
   auth: {
     title: 'Sign in',
@@ -140,7 +165,7 @@ export default {
     deleteConfirmBody: 'Are you sure you want to permanently delete this account? This action cannot be undone.',
     deleteConfirmYes: 'Delete',
     deleteConfirmNo: 'Cancel',
-    supportHelpText: 'Tianxing Dispatch Help:\n1. Edit Data: Directly type inside grid cells to update them.\n2. Branches: Toggle branch tabs above to manage Taipei/Hsinchu/Kaohsiung operations.\n3. Saving: Always click Save in the top right to write changes to local database.',
+    supportHelpText: 'Tianxing Dispatch Help:\n1. Edit Data: Directly type inside grid cells to update them.\n2. Branches: Toggle branch tabs above to manage Taipei/Hsinchu/Kaohsiung operations.\n3. Saving: Changes save automatically. Use Undo/Redo (or Ctrl/Cmd+Z) in the top right to step back through edits made this session.',
     supportContactText: 'For system technical support, contact us at:\nEmail: support@fyf.com.tw\nPhone: 0982-115-727',
     aboutUsText: 'Tianxing Moving Dispatch Management (v0.1.4) supports cross-platform log scheduling, instant statistics, branch filters, and automated payroll calculations.',
     termsText: 'Privacy Statement: All dispatch schedule records are saved in your local SQLite file and never transmitted to external cloud systems.',
@@ -149,5 +174,21 @@ export default {
     reportPlaceholder: 'Please describe the problem you encountered or your feedback, we will handle it as soon as possible...',
     reportSubmit: 'Submit Report',
     langSelect: 'Language'
+  },
+  maintenance: {
+    title: 'Maintenance Records',
+    back: 'Back to Dispatch',
+    columns: {
+      dateTime: 'Date / Time',
+      driverName: 'Driver',
+      amount: 'Amount',
+      description: 'Description'
+    },
+    fields: {
+      dateTime: 'e.g. 2026-01-15 09:30',
+      driverName: 'Driver name',
+      amount: 'Amount',
+      description: 'Description'
+    }
   }
 }

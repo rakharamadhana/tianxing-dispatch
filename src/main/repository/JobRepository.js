@@ -13,19 +13,22 @@
  * @typedef {Object} Job
  * @property {string}  id                serialized string id (future-proof for UUIDs)
  * @property {string}  branch            '台北' | '新竹' | '高雄'
+ * @property {string}  project_type      '搬工' | '包材' | '時薪'
  * @property {string}  job_date          'YYYYMMDD'
  * @property {string}  job_time          'HH:MM'
  * @property {string}  customer_name
  * @property {string}  phone
  * @property {string}  move_in_address
  * @property {string}  move_out_address
- * @property {number}  unit_price
+ * @property {number}  unit_price        per-trip price ('搬工') or hourly rate ('包材'/'時薪')
  * @property {string}  tax_status        '含稅' | '未稅'
- * @property {number}  quantity
- * @property {number}  total_price        unit_price * quantity (recomputed on save)
+ * @property {number}  quantity          item count ('搬工') or hours worked ('包材'/'時薪')
+ * @property {number}  worker_count      number of workers (only meaningful for '包材'/'時薪')
+ * @property {number}  total_price        unit_price * quantity, additionally * worker_count for hourly types (recomputed on save)
  * @property {string}  payment_method    '現金' | '月結'
  * @property {string}  payment_status    '已付款' | '未付款'
  * @property {string}  note
+ * @property {{name: string, quantity: number}[]} materials  materials used (only meaningful for '包材')
  *
  * @typedef {Object} ListFilters
  * @property {string} [dateQuery]     substring match on job_date

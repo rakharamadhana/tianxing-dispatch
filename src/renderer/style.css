@@ -414,6 +414,35 @@ body {
   background: currentColor;
 }
 
+.saved-flag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7b8794;
+  padding: 0 4px;
+  min-height: var(--control-h);
+}
+
+.error-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand-red);
+  background: #fdecea;
+  border-radius: 20px;
+  padding: 0 12px;
+  min-height: var(--control-h);
+}
+.error-flag .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 /* ---------------- Main content ---------------- */
 .content {
   flex: 1;
@@ -432,7 +461,7 @@ body {
 .grid-head,
 .job-row {
   display: grid;
-  grid-template-columns: 132px 1.4fr 2fr 118px 82px 110px 1.6fr 44px;
+  grid-template-columns: 148px 150px 1.3fr 1.7fr 150px 84px 84px 104px 1.7fr 40px;
   align-items: stretch;
 }
 
@@ -474,9 +503,11 @@ body {
   justify-content: center;
   padding: var(--s2) 4px;
 }
-
 .job-row input,
-.job-row textarea {
+.job-row textarea,
+.job-row select,
+.material-row input,
+.material-row select {
   width: 100%;
   border: 1px solid #cbd7e5;
   border-radius: 5px;
@@ -486,8 +517,25 @@ body {
   font: inherit;
   font-size: 13px;
 }
+/* number inputs are cramped in narrow grid cells — the native spin buttons
+   waste the width worst, so drop them and rely on typing/scroll instead */
+.job-row input[type='number']::-webkit-outer-spin-button,
+.job-row input[type='number']::-webkit-inner-spin-button,
+.material-line input[type='number']::-webkit-outer-spin-button,
+.material-line input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.job-row input[type='number'],
+.material-line input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 .job-row input:focus,
-.job-row textarea:focus {
+.job-row textarea:focus,
+.job-row select:focus,
+.material-row input:focus,
+.material-row select:focus {
   outline: none;
   border-color: var(--brand-blue);
   box-shadow: 0 0 0 2px rgba(22, 174, 184, 0.15);
@@ -501,6 +549,87 @@ body {
   font-weight: 900;
   color: var(--ink);
 }
+.cell-muted {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 7px 0;
+}
+
+/* materials sub-row (packaging rows only) — full-width strip under the row it belongs to */
+.material-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: var(--s2) var(--cell-px);
+  background: #f8fbfd;
+  border-top: 1px dashed var(--line);
+}
+.material-row.invalid {
+  background: #fdecea;
+  border-top-color: var(--brand-red);
+  box-shadow: inset 0 0 0 1px var(--brand-red);
+}
+.material-row.invalid .material-row-label {
+  color: var(--brand-red);
+}
+.material-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.material-row-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  flex: none;
+}
+.material-line {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.material-line select {
+  width: auto;
+  min-width: 90px;
+}
+.material-line input {
+  width: 70px;
+}
+.material-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.material-del:hover {
+  color: var(--brand-red);
+  background: #fff1f0;
+}
+.material-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px dashed #cbd7e5;
+  border-radius: 5px;
+  padding: 5px 8px;
+  background: transparent;
+  color: #40536d;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+.material-add:hover {
+  background: #f4f8fc;
+}
 
 /* segmented toggle (tax, pay method) */
 .seg {
@@ -510,12 +639,15 @@ body {
   overflow: hidden;
 }
 .seg button {
+  flex: 1 1 0;
   border: 0;
   background: #fff;
   color: #40536d;
   font-weight: 800;
   font-size: 12px;
   padding: 6px 10px;
+  white-space: nowrap;
+  text-align: center;
   cursor: pointer;
 }
 .seg button + button {
@@ -839,6 +971,9 @@ body {
 }
 .dark .job-row input,
 .dark .job-row textarea,
+.dark .job-row select,
+.dark .material-row input,
+.dark .material-row select,
 .dark .profile-form input,
 .dark .profile-form select {
   background: #0f172a;
@@ -847,10 +982,40 @@ body {
 }
 .dark .job-row input:focus,
 .dark .job-row textarea:focus,
+.dark .job-row select:focus,
+.dark .material-row input:focus,
+.dark .material-row select:focus,
 .dark .profile-form input:focus,
 .dark .profile-form select:focus {
   border-color: var(--brand-blue);
   box-shadow: 0 0 0 2px rgba(22, 174, 184, 0.25);
+}
+.dark .material-row {
+  background: #1e293b;
+  border-top-color: #334155;
+}
+.dark .material-row-label {
+  color: #94a3b8;
+}
+.dark .material-row.invalid {
+  background: rgba(227, 69, 47, 0.15);
+  border-top-color: var(--brand-red);
+}
+.dark .material-row.invalid .material-row-label {
+  color: var(--brand-red);
+}
+.dark .material-add {
+  border-color: #334155;
+  color: #94a3b8;
+}
+.dark .material-add:hover {
+  background: #0f172a;
+}
+.dark .error-flag {
+  background: rgba(227, 69, 47, 0.15);
+}
+.dark .saved-flag {
+  color: #64748b;
 }
 .dark .btn {
   background: #1e293b;

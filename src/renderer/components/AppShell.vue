@@ -6,9 +6,11 @@ import ThemeToggle from './ThemeToggle.vue'
 import DispatchTable from './DispatchTable.vue'
 import ProfileView from './ProfileView.vue'
 import SettingsView from './SettingsView.vue'
+import MaintenanceView from './MaintenanceView.vue'
 import YearSelectView from './YearSelectView.vue'
 import Icon from './Icon.vue'
 import { useJobs } from '../composables/useJobs.js'
+import { useMaintenance } from '../composables/useMaintenance.js'
 import { useAuth } from '../composables/useAuth.js'
 
 const { user, allowedBranches, logout } = useAuth()
@@ -17,16 +19,25 @@ const currentView = ref('year-select')
 
 // Start on the first branch this user is allowed to see.
 const jobs = useJobs(allowedBranches.value[0])
+// Maintenance records aren't year-scoped, so load them as soon as the branch is known.
+const maintenance = useMaintenance(allowedBranches.value[0])
+maintenance.load()
 
 // Warn before closing with unsaved changes.
 function onBeforeUnload(e) {
-  if (jobs.dirty.value) {
+  if (jobs.dirty.value || maintenance.dirty.value) {
     e.preventDefault()
     e.returnValue = ''
   }
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 onBeforeUnmount(() => window.removeEventListener('beforeunload', onBeforeUnload))
+
+// Branch tabs are shared between the dispatch table and maintenance records.
+function onBranchChange(next) {
+  jobs.setBranch(next)
+  maintenance.setBranch(next)
+}
 
 function changeYear(event) {
   const year = event.target.value
@@ -83,14 +94,17 @@ for (let y = currentYear; y >= 2024; y--) {
       </button>
     </header>
 
-    <template v-if="currentView === 'dispatch'">
+    <template v-if="currentView === 'dispatch' || currentView === 'maintenance'">
       <BranchTabs
         :active="jobs.branch.value"
         :branches="allowedBranches"
-        @change="jobs.setBranch"
+        :active-utility="currentView === 'maintenance' ? 'maintenance' : ''"
+        @change="onBranchChange"
         @settings="currentView = 'settings'"
+        @maintenance="currentView = 'maintenance'"
       />
-      <DispatchTable :jobs="jobs" />
+      <DispatchTable v-if="currentView === 'dispatch'" :jobs="jobs" />
+      <MaintenanceView v-else :maintenance="maintenance" @back="currentView = 'dispatch'" />
     </template>
     <ProfileView v-else-if="currentView === 'profile'" @back="currentView = 'dispatch'" />
     <SettingsView v-else-if="currentView === 'settings'" @back="currentView = 'dispatch'" />

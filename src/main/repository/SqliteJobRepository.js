@@ -2,15 +2,24 @@ import { JobRepository } from './JobRepository.js'
 import { getDb } from '../db.js'
 
 const COLUMNS = [
-  'branch', 'job_date', 'job_time', 'customer_name', 'phone',
+  'branch', 'project_type', 'job_date', 'job_time', 'customer_name', 'phone',
   'move_in_address', 'move_out_address', 'unit_price', 'tax_status',
-  'quantity', 'total_price', 'payment_method', 'payment_status', 'note',
-  'sort_order', 'created_at', 'updated_at'
+  'quantity', 'worker_count', 'total_price', 'payment_method', 'payment_status', 'note',
+  'materials', 'sort_order', 'created_at', 'updated_at'
 ]
 
-/** Convert a DB row to the wire shape (id as string). */
+const HOURLY_TYPES = ['包材', '時薪']
+
+/** Mirrors src/renderer/config/projectTypes.js#totalFor (main process can't import renderer code). */
+function totalFor(record) {
+  const price = Number(record.unit_price) || 0
+  const qty = Number(record.quantity) || 0
+  return HOURLY_TYPES.includes(record.project_type) ? price * qty * (Number(record.worker_count) || 0) : price * qty
+}
+
+/** Convert a DB row to the wire shape (id as string, materials parsed to an array). */
 function toJob(row) {
-  return { ...row, id: String(row.id) }
+  return { ...row, id: String(row.id), materials: JSON.parse(row.materials || '[]') }
 }
 
 export class SqliteJobRepository extends JobRepository {
@@ -63,12 +72,12 @@ export class SqliteJobRepository extends JobRepository {
     `)
     const update = db.prepare(`
       UPDATE jobs SET
-        branch=@branch, job_date=@job_date, job_time=@job_time,
+        branch=@branch, project_type=@project_type, job_date=@job_date, job_time=@job_time,
         customer_name=@customer_name, phone=@phone,
         move_in_address=@move_in_address, move_out_address=@move_out_address,
         unit_price=@unit_price, tax_status=@tax_status, quantity=@quantity,
-        total_price=@total_price, payment_method=@payment_method,
-        payment_status=@payment_status, note=@note, sort_order=@sort_order,
+        worker_count=@worker_count, total_price=@total_price, payment_method=@payment_method,
+        payment_status=@payment_status, note=@note, materials=@materials, sort_order=@sort_order,
         updated_at=@updated_at
       WHERE id=@id
     `)
@@ -83,6 +92,7 @@ export class SqliteJobRepository extends JobRepository {
         const quantity = Number(r.quantity) || 0
         const record = {
           branch,
+          project_type: r.project_type || '搬工',
           job_date: r.job_date || '',
           job_time: r.job_time || '',
           customer_name: r.customer_name || '',
@@ -92,13 +102,15 @@ export class SqliteJobRepository extends JobRepository {
           unit_price: unitPrice,
           tax_status: r.tax_status || '未稅',
           quantity,
-          total_price: unitPrice * quantity,
+          worker_count: Number(r.worker_count) || 0,
           payment_method: r.payment_method || '現金',
           payment_status: r.payment_status || '未付款',
           note: r.note || '',
+          materials: JSON.stringify(Array.isArray(r.materials) ? r.materials : []),
           sort_order: index,
           updated_at: now
         }
+        record.total_price = totalFor(record)
         // A row with a numeric existing id gets updated; new/blank ids inserted.
         const existingId = /^\d+$/.test(String(r.id || '')) ? Number(r.id) : null
         if (existingId) {

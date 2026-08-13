@@ -4,15 +4,20 @@ import Icon from './Icon.vue'
 const props = defineProps({
   active: { type: String, required: true },
   // Cities this user may access (CEO = all three; a manager = just theirs).
-  branches: { type: Array, default: () => ['台北', '新竹', '高雄'] }
+  branches: { type: Array, default: () => ['台北', '新竹', '高雄'] },
+  // Which utility screen (if any) is currently open, e.g. 'maintenance'.
+  activeUtility: { type: String, default: '' }
 })
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'settings', 'maintenance'])
 
 const utilities = [
   { key: 'settings', icon: 'settings' },
   { key: 'fuel', icon: 'fuel' },
   { key: 'maintenance', icon: 'maintenance' }
 ]
+
+// fuel is still a placeholder; settings and maintenance are wired up
+const enabledKeys = ['settings', 'maintenance']
 </script>
 
 <template>
@@ -29,14 +34,14 @@ const utilities = [
 
     <span class="tab-sep"></span>
 
-    <!-- Utility tabs: settings is active, others are visible placeholders -->
+    <!-- Utility tabs: fuel is still a visible placeholder -->
     <button
       v-for="u in utilities"
       :key="u.key"
       class="tab"
-      :class="{ disabled: u.key !== 'settings' }"
-      :disabled="u.key !== 'settings'"
-      @click="u.key === 'settings' ? emit('settings') : null"
+      :class="{ disabled: !enabledKeys.includes(u.key), active: u.key === props.activeUtility }"
+      :disabled="!enabledKeys.includes(u.key)"
+      @click="enabledKeys.includes(u.key) ? emit(u.key) : null"
     >
       <Icon :name="u.icon" :size="15" /><span>{{ $t('tabs.' + u.key) }}</span>
     </button>

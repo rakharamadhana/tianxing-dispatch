@@ -9,6 +9,11 @@ const api = {
     list: (branch, filters) => ipcRenderer.invoke('jobs:list', branch, filters),
     save: (branch, payload) => ipcRenderer.invoke('jobs:save', branch, payload),
     delete: (id) => ipcRenderer.invoke('jobs:delete', id)
+  },
+  maintenance: {
+    list: (branch) => ipcRenderer.invoke('maintenance:list', branch),
+    save: (branch, payload) => ipcRenderer.invoke('maintenance:save', branch, payload),
+    delete: (id) => ipcRenderer.invoke('maintenance:delete', id)
   }
 }
 

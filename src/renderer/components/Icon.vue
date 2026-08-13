@@ -36,9 +36,14 @@ defineProps({
       <polyline points="7 3 7 8 15 8" />
     </template>
 
-    <template v-else-if="name === 'restore'">
+    <template v-else-if="name === 'restore' || name === 'undo'">
       <polyline points="1 4 1 10 7 10" />
       <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+    </template>
+
+    <template v-else-if="name === 'redo'">
+      <polyline points="23 4 23 10 17 10" />
+      <path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10" />
     </template>
 
     <template v-else-if="name === 'add'">

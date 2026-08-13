@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import JobRow from './JobRow.vue'
 import FilterBar from './FilterBar.vue'
 import Icon from './Icon.vue'
@@ -7,6 +7,19 @@ import Icon from './Icon.vue'
 const props = defineProps({
   jobs: { type: Object, required: true } // the useJobs() instance
 })
+
+// Ctrl/Cmd+Z to undo, Ctrl/Cmd+Shift+Z to redo — app-level, overrides native input undo.
+function onKeydown(e) {
+  if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return
+  e.preventDefault()
+  if (e.shiftKey) {
+    props.jobs.redo()
+  } else {
+    props.jobs.undo()
+  }
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 const PAGE_SIZE = 10
 const page = ref(1)
@@ -59,8 +72,14 @@ function addRow() {
       <Icon name="add" :size="16" /><span>{{ $t('actions.addRow') }}</span>
     </button>
 
-    <span v-if="jobs.dirty.value" class="dirty-flag">
-      <span class="dot"></span>{{ $t('status.unsaved') }}
+    <span v-if="jobs.saving.value || jobs.dirty.value" class="dirty-flag">
+      <span class="dot"></span>{{ $t('status.saving') }}
+    </span>
+    <span v-else-if="!jobs.saveError.value" class="saved-flag">
+      {{ $t('status.saved') }}
+    </span>
+    <span v-if="jobs.saveError.value" class="error-flag">
+      <span class="dot"></span>{{ $t('validation.' + jobs.saveError.value) }}
     </span>
 
     <span class="grow"></span>
@@ -76,11 +95,11 @@ function addRow() {
       <Icon name="payroll" :size="16" /><span>{{ $t('actions.payroll') }}</span>
     </button>
 
-    <button class="btn" @click="jobs.restore()">
-      <Icon name="restore" :size="16" /><span>{{ $t('actions.restore') }}</span>
+    <button class="btn icon-only" :disabled="!jobs.canUndo.value" :title="$t('actions.undo')" @click="jobs.undo()">
+      <Icon name="undo" :size="16" />
     </button>
-    <button class="btn primary" :disabled="jobs.saving.value" @click="jobs.save()">
-      <Icon name="save" :size="16" /><span>{{ $t('actions.save') }}</span>
+    <button class="btn icon-only" :disabled="!jobs.canRedo.value" :title="$t('actions.redo')" @click="jobs.redo()">
+      <Icon name="redo" :size="16" />
     </button>
   </div>
 
@@ -88,11 +107,13 @@ function addRow() {
   <div class="content">
     <div class="card">
       <div class="grid-head">
+        <div class="h">{{ $t('columns.projectType') }}</div>
         <div class="h">{{ $t('columns.dateTime') }}</div>
         <div class="h">{{ $t('columns.namePhone') }}</div>
         <div class="h">{{ $t('columns.inOut') }}</div>
         <div class="h">{{ $t('columns.unitPrice') }}</div>
         <div class="h">{{ $t('columns.quantity') }}</div>
+        <div class="h">{{ $t('columns.workerCount') }}</div>
         <div class="h">{{ $t('columns.total') }}</div>
         <div class="h">{{ $t('columns.note') }}</div>
         <div class="h"></div>
@@ -104,8 +125,9 @@ function addRow() {
 
       <JobRow
         v-for="(row, i) in pagedRows"
-        :key="row.id || 'new-' + absoluteIndex(i)"
+        :key="row._key"
         :row="row"
+        :jobs="jobs"
         @delete="jobs.removeRow(absoluteIndex(i))"
       />
     </div>
