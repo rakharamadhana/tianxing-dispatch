@@ -369,6 +369,11 @@ body {
 .btn.ghost:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+.btn.ghost.active {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: #fff;
+}
 .btn.icon-only {
   width: var(--control-h);
   padding: 0;
@@ -503,6 +508,14 @@ body {
   justify-content: center;
   padding: var(--s2) 4px;
 }
+.branch-move-select {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.branch-move-select:hover,
+.branch-move-select:focus {
+  opacity: 1;
+}
 .job-row input,
 .job-row textarea,
 .job-row select,
@@ -529,6 +542,18 @@ body {
 .job-row input[type='number'],
 .material-line input[type='number'] {
   -moz-appearance: textfield;
+}
+/* native date/time picker glyph defaults to a dark icon — invisible on dark
+   rows, so force it dark-on-light here and flip to light-on-dark below */
+.job-row input[type='date']::-webkit-calendar-picker-indicator,
+.job-row input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+  opacity: 0.65;
+  cursor: pointer;
+}
+.job-row input[type='date']::-webkit-calendar-picker-indicator:hover,
+.job-row input[type='time']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 .job-row input:focus,
@@ -683,6 +708,21 @@ body {
 .chip.unpaid {
   color: var(--status-scheduled-fg);
   background: var(--status-scheduled-bg);
+}
+.chip.static {
+  cursor: default;
+}
+.chip.pending {
+  color: var(--status-scheduled-fg);
+  background: var(--status-scheduled-bg);
+}
+.chip.approved {
+  color: var(--status-complete-fg);
+  background: var(--status-complete-bg);
+}
+.chip.rejected {
+  color: var(--brand-red);
+  background: #fdecea;
 }
 
 .row-del {
@@ -979,6 +1019,15 @@ body {
   background: #0f172a;
   border-color: #334155;
   color: #f1f5f9;
+}
+.dark .job-row input[type='date']::-webkit-calendar-picker-indicator,
+.dark .job-row input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.65;
+}
+.dark .job-row input[type='date']::-webkit-calendar-picker-indicator:hover,
+.dark .job-row input[type='time']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 .dark .job-row input:focus,
 .dark .job-row textarea:focus,

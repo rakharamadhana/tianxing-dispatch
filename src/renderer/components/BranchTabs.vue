@@ -8,16 +8,12 @@ const props = defineProps({
   // Which utility screen (if any) is currently open, e.g. 'maintenance'.
   activeUtility: { type: String, default: '' }
 })
-const emit = defineEmits(['change', 'settings', 'maintenance'])
+const emit = defineEmits(['change', 'fuel', 'maintenance'])
 
 const utilities = [
-  { key: 'settings', icon: 'settings' },
   { key: 'fuel', icon: 'fuel' },
   { key: 'maintenance', icon: 'maintenance' }
 ]
-
-// fuel is still a placeholder; settings and maintenance are wired up
-const enabledKeys = ['settings', 'maintenance']
 </script>
 
 <template>
@@ -34,14 +30,12 @@ const enabledKeys = ['settings', 'maintenance']
 
     <span class="tab-sep"></span>
 
-    <!-- Utility tabs: fuel is still a visible placeholder -->
     <button
       v-for="u in utilities"
       :key="u.key"
       class="tab"
-      :class="{ disabled: !enabledKeys.includes(u.key), active: u.key === props.activeUtility }"
-      :disabled="!enabledKeys.includes(u.key)"
-      @click="enabledKeys.includes(u.key) ? emit(u.key) : null"
+      :class="{ active: u.key === props.activeUtility }"
+      @click="emit(u.key)"
     >
       <Icon :name="u.icon" :size="15" /><span>{{ $t('tabs.' + u.key) }}</span>
     </button>

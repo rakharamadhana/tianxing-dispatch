@@ -10,10 +10,27 @@ const api = {
     save: (branch, payload) => ipcRenderer.invoke('jobs:save', branch, payload),
     delete: (id) => ipcRenderer.invoke('jobs:delete', id)
   },
+  fuel: {
+    list: (branch) => ipcRenderer.invoke('fuel:list', branch),
+    save: (branch, payload) => ipcRenderer.invoke('fuel:save', branch, payload)
+  },
   maintenance: {
     list: (branch) => ipcRenderer.invoke('maintenance:list', branch),
-    save: (branch, payload) => ipcRenderer.invoke('maintenance:save', branch, payload),
-    delete: (id) => ipcRenderer.invoke('maintenance:delete', id)
+    save: (branch, payload) => ipcRenderer.invoke('maintenance:save', branch, payload)
+  },
+  drivers: {
+    list: (branch) => ipcRenderer.invoke('drivers:list', branch)
+  },
+  workers: {
+    list: (branch) => ipcRenderer.invoke('workers:list', branch)
+  },
+  auth: {
+    login: (email, password) => ipcRenderer.invoke('auth:login', email, password),
+    logout: () => ipcRenderer.invoke('auth:logout'),
+    session: () => ipcRenderer.invoke('auth:session'),
+    updateProfile: (newEmail, newPassword, currentPassword) =>
+      ipcRenderer.invoke('auth:updateProfile', newEmail, newPassword, currentPassword),
+    deleteAccount: () => ipcRenderer.invoke('auth:deleteAccount')
   }
 }
 

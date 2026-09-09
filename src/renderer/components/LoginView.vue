@@ -10,12 +10,19 @@ const { login } = useAuth()
 const email = ref('')
 const password = ref('')
 const errorKey = ref('')
+const loading = ref(false)
 
-function submit() {
+async function submit() {
+  if (loading.value) return
   errorKey.value = ''
-  const res = login(email.value, password.value)
-  if (!res.ok) errorKey.value = res.error
-  // On success the shared auth state flips and App swaps to the main shell.
+  loading.value = true
+  try {
+    const res = await login(email.value, password.value)
+    if (!res.ok) errorKey.value = res.error
+    // On success the shared auth state flips and App swaps to the main shell.
+  } finally {
+    loading.value = false
+  }
 }
 
 function fill(demoEmail) {
@@ -50,6 +57,7 @@ function fill(demoEmail) {
               v-model="email"
               type="email"
               autocomplete="username"
+              :disabled="loading"
               :placeholder="$t('auth.emailPlaceholder')"
             />
           </span>
@@ -63,6 +71,7 @@ function fill(demoEmail) {
               v-model="password"
               type="password"
               autocomplete="current-password"
+              :disabled="loading"
               :placeholder="$t('auth.passwordPlaceholder')"
             />
           </span>
@@ -70,8 +79,9 @@ function fill(demoEmail) {
 
         <p v-if="errorKey" class="auth-message error">{{ $t('auth.' + errorKey) }}</p>
 
-        <button class="btn primary auth-submit" type="submit">
-          {{ $t('auth.signIn') }}
+        <button class="btn primary auth-submit" type="submit" :disabled="loading">
+          <span v-if="loading" class="spinner"></span>
+          {{ loading ? $t('auth.signingIn') : $t('auth.signIn') }}
         </button>
       </form>
 
@@ -83,6 +93,7 @@ function fill(demoEmail) {
             :key="a.email"
             type="button"
             class="demo-chip"
+            :disabled="loading"
             @click="fill(a.email)"
           >
             {{ a.email }}
@@ -93,3 +104,29 @@ function fill(demoEmail) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.auth-submit:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

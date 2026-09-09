@@ -40,29 +40,19 @@ export function getDb() {
       payment_status  TEXT    DEFAULT '未付款',
       note            TEXT    DEFAULT '',
       materials       TEXT    DEFAULT '[]',
+      member_ids      TEXT    DEFAULT '[]',
+      member_percentages TEXT DEFAULT '{}',
       sort_order      INTEGER DEFAULT 0,
       created_at      TEXT    DEFAULT '',
       updated_at      TEXT    DEFAULT ''
     );
     CREATE INDEX IF NOT EXISTS idx_jobs_branch ON jobs(branch);
 
-    CREATE TABLE IF NOT EXISTS maintenance_records (
-      id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      branch          TEXT    NOT NULL,
-      record_datetime TEXT    DEFAULT '',
-      driver_name     TEXT    DEFAULT '',
-      amount          INTEGER DEFAULT 0,
-      description     TEXT    DEFAULT '',
-      sort_order      INTEGER DEFAULT 0,
-      created_at      TEXT    DEFAULT '',
-      updated_at      TEXT    DEFAULT ''
-    );
-    CREATE INDEX IF NOT EXISTS idx_maintenance_branch ON maintenance_records(branch);
+    DROP TABLE IF EXISTS maintenance_records;
   `)
 
   migrateSchema(db)
   seedIfEmpty(db)
-  seedMaintenanceIfEmpty(db)
   return db
 }
 
@@ -72,7 +62,9 @@ function migrateSchema(database) {
   const additions = [
     ['project_type', "TEXT NOT NULL DEFAULT '搬工'"],
     ['worker_count', 'INTEGER DEFAULT 0'],
-    ['materials', "TEXT DEFAULT '[]'"]
+    ['materials', "TEXT DEFAULT '[]'"],
+    ['member_ids', "TEXT DEFAULT '[]'"],
+    ['member_percentages', "TEXT DEFAULT '{}'"]
   ]
   for (const [name, definition] of additions) {
     if (!existing.has(name)) {
@@ -123,34 +115,6 @@ function seedIfEmpty(database) {
       unit_price: 5000, tax_status: '含稅', quantity: 15, worker_count: 0, total_price: 75000,
       payment_method: '現金', payment_status: '已付款', note: '今日勿接', materials: '[]'
     }
-  ]
-
-  const insertMany = database.transaction((rows) => {
-    rows.forEach((r, i) => insert.run({ ...r, sort_order: i, created_at: now, updated_at: now }))
-  })
-  insertMany(samples)
-}
-
-/** Seed a few sample maintenance rows on first run only. */
-function seedMaintenanceIfEmpty(database) {
-  const count = database.prepare('SELECT COUNT(*) AS c FROM maintenance_records').get().c
-  if (count > 0) return
-
-  const now = new Date().toISOString()
-  const insert = database.prepare(`
-    INSERT INTO maintenance_records (
-      branch, record_datetime, driver_name, amount, description, sort_order, created_at, updated_at
-    ) VALUES (
-      @branch, @record_datetime, @driver_name, @amount, @description, @sort_order, @created_at, @updated_at
-    )
-  `)
-
-  const samples = [
-    { branch: '高雄', record_datetime: '2026-01-15 09:30', driver_name: '王志明', amount: 1200, description: '更換機油與機油濾芯' },
-    { branch: '高雄', record_datetime: '2026-02-03 14:00', driver_name: '陳建宏', amount: 850, description: '煞車來令片檢查更換' },
-    { branch: '高雄', record_datetime: '2026-03-20 10:15', driver_name: '林大山', amount: 3200, description: '輪胎四輪定位與更換' },
-    { branch: '高雄', record_datetime: '2026-04-11 16:45', driver_name: '張美玲', amount: 450, description: '雨刷更換' },
-    { branch: '高雄', record_datetime: '2026-05-28 11:00', driver_name: '李國強', amount: 2100, description: '冷氣系統保養' }
   ]
 
   const insertMany = database.transaction((rows) => {

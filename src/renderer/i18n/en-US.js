@@ -5,9 +5,11 @@ export default {
     edition: 'Carbon Dioxide HQ Edition © 2026'
   },
   branches: {
+    全部: 'All',
     台北: 'Taipei',
     新竹: 'Hsinchu',
-    高雄: 'Kaohsiung'
+    高雄: 'Kaohsiung',
+    總公司: 'Headquarters'
   },
   projectTypes: {
     搬工: 'Moving',
@@ -37,6 +39,10 @@ export default {
     redo: 'Redo',
     addRow: 'Add row',
     delete: 'Delete',
+    approve: 'Approve',
+    reject: 'Reject',
+    moveBranch: 'Move to another branch (CEO only)',
+    moveBranchSaveFirst: 'Save this row first before moving it',
     addMaterial: 'Add material',
     langToggle: '中文'
   },
@@ -91,7 +97,10 @@ export default {
   status: {
     saving: 'Saving…',
     saved: 'All changes saved',
-    empty: 'No records on this page. Click "Add row" to start.'
+    empty: 'No records on this page. Click "Add row" to start.',
+    pending: 'Pending',
+    complete: 'Complete',
+    projectStatusHint: 'Payroll settlement status from the driver app (read-only)'
   },
   confirm: {
     unsavedTitle: 'Unsaved changes',
@@ -108,6 +117,7 @@ export default {
     emailPlaceholder: 'Enter your email',
     passwordPlaceholder: 'Enter your password',
     signIn: 'Sign in',
+    signingIn: 'Signing in…',
     logout: 'Log out',
     invalidCredentials: 'Incorrect email or password',
     demoLabel: 'Demo accounts (click to fill)',
@@ -135,6 +145,7 @@ export default {
     emailTaken: 'This email is already in use',
     emptyEmail: 'Email cannot be empty',
     wrongCurrentPassword: 'Incorrect current password',
+    notSupported: 'This action is not supported yet',
     yearSelectTitle: 'Select Year',
     yearSelectSubtitle: 'Please select the year you want to manage',
     textSize: 'Text size',
@@ -176,19 +187,72 @@ export default {
     langSelect: 'Language'
   },
   maintenance: {
-    title: 'Maintenance Records',
+    title: 'Vehicle Maintenance Requests',
     back: 'Back to Dispatch',
     columns: {
-      dateTime: 'Date / Time',
+      dateTime: 'Date',
       driverName: 'Driver',
+      address: 'Location',
       amount: 'Amount',
-      description: 'Description'
+      note: 'Note',
+      receipt: 'Receipt',
+      status: 'Status'
     },
     fields: {
-      dateTime: 'e.g. 2026-01-15 09:30',
-      driverName: 'Driver name',
-      amount: 'Amount',
-      description: 'Description'
+      selectDriver: 'Select driver…',
+      address: 'Location',
+      note: 'Note'
+    },
+    receiptLink: 'View Receipt',
+    noReceipt: '—'
+  },
+  salary: {
+    title: 'Payroll',
+    back: 'Back to Dispatch',
+    total: 'Total Payroll',
+    assignWorkers: 'Assign Workers',
+    noWorkers: 'No workers in this branch yet',
+    noRecords: 'No payroll records yet.',
+    columns: {
+      worker: 'Worker',
+      role: 'Role',
+      amount: 'Amount'
+    },
+    roles: {
+      manager: 'Manager',
+      driver: 'Driver',
+      assistant: 'Assistant'
     }
+  },
+  fuel: {
+    title: 'Fuel Requests',
+    back: 'Back to Dispatch',
+    columns: {
+      dateTime: 'Date',
+      driverName: 'Driver',
+      reportedAmount: 'Reported Amount',
+      approvedAmount: 'Approved Amount',
+      status: 'Status'
+    },
+    fields: {
+      selectDriver: 'Select driver…',
+      reportedAmount: 'Reported amount',
+      approvedAmount: 'Approved amount'
+    }
+  },
+  requestStatus: {
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected'
+  },
+  export: {
+    selectMonthTitle: 'Select month to export',
+    selectYear: 'Year',
+    selectMonth: 'Month',
+    confirm: 'Download',
+    cancel: 'Cancel',
+    downloading: 'Exporting…',
+    error: 'Export failed, please try again',
+    empty: 'No data to export'
   }
 }

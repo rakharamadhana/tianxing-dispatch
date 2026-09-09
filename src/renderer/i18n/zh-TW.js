@@ -5,9 +5,11 @@ export default {
     edition: '二氧化碳 總公司版 © 2026'
   },
   branches: {
+    全部: '全部',
     台北: '台北',
     新竹: '新竹',
-    高雄: '高雄'
+    高雄: '高雄',
+    總公司: '總公司'
   },
   projectTypes: {
     搬工: '搬工',
@@ -37,6 +39,10 @@ export default {
     redo: '重做',
     addRow: '新增一筆',
     delete: '刪除',
+    approve: '核准',
+    reject: '拒絕',
+    moveBranch: '搬移至其他分公司（僅限 CEO）',
+    moveBranchSaveFirst: '請先儲存此筆資料才能搬移',
     addMaterial: '新增材料',
     langToggle: 'EN'
   },
@@ -91,7 +97,10 @@ export default {
   status: {
     saving: '儲存中…',
     saved: '所有變更已儲存',
-    empty: '本頁沒有資料，點「新增一筆」開始建立。'
+    empty: '本頁沒有資料，點「新增一筆」開始建立。',
+    pending: '待處理',
+    complete: '已完成',
+    projectStatusHint: '來自司機端 App 的薪資結算狀態（唯讀）'
   },
   confirm: {
     unsavedTitle: '尚未儲存',
@@ -108,6 +117,7 @@ export default {
     emailPlaceholder: '請輸入電子郵件',
     passwordPlaceholder: '請輸入密碼',
     signIn: '登入',
+    signingIn: '登入中…',
     logout: '登出',
     invalidCredentials: '電子郵件或密碼錯誤',
     demoLabel: '測試帳號（點選自動帶入）',
@@ -135,6 +145,7 @@ export default {
     emailTaken: '此電子郵件已被其他帳號使用',
     emptyEmail: '電子郵件不能為空',
     wrongCurrentPassword: '目前密碼不正確',
+    notSupported: '此帳號功能暫不支援',
     yearSelectTitle: '選擇工作年度',
     yearSelectSubtitle: '請選擇您要管理的派車資料年份',
     textSize: '字體大小',
@@ -176,19 +187,72 @@ export default {
     langSelect: '顯示語言'
   },
   maintenance: {
-    title: '保養紀錄',
+    title: '車輛保養申請',
     back: '返回出車表',
     columns: {
-      dateTime: '日期 / 時間',
+      dateTime: '日期',
       driverName: '司機',
+      address: '地點',
       amount: '金額',
-      description: '說明'
+      note: '備註',
+      receipt: '收據',
+      status: '狀態'
     },
     fields: {
-      dateTime: '例如 2026-01-15 09:30',
-      driverName: '司機姓名',
-      amount: '金額',
-      description: '說明'
+      selectDriver: '選擇司機…',
+      address: '地點',
+      note: '備註'
+    },
+    receiptLink: '查看收據',
+    noReceipt: '—'
+  },
+  salary: {
+    title: '薪資結算',
+    back: '返回出車表',
+    total: '薪資總支出',
+    assignWorkers: '指派工作人員',
+    noWorkers: '此分公司尚無工作人員',
+    noRecords: '目前尚無薪資紀錄。',
+    columns: {
+      worker: '人員',
+      role: '職位',
+      amount: '金額'
+    },
+    roles: {
+      manager: '管理員',
+      driver: '司機',
+      assistant: '助理'
     }
+  },
+  fuel: {
+    title: '油資申請',
+    back: '返回出車表',
+    columns: {
+      dateTime: '日期',
+      driverName: '司機',
+      reportedAmount: '回報金額',
+      approvedAmount: '核准金額',
+      status: '狀態'
+    },
+    fields: {
+      selectDriver: '選擇司機…',
+      reportedAmount: '回報金額',
+      approvedAmount: '核准金額'
+    }
+  },
+  requestStatus: {
+    pending: '待審核',
+    approved: '已核准',
+    rejected: '已拒絕'
+  },
+  export: {
+    selectMonthTitle: '選擇匯出月份',
+    selectYear: '年度',
+    selectMonth: '月份',
+    confirm: '下載',
+    cancel: '取消',
+    downloading: '匯出中…',
+    error: '匯出失敗，請稍後再試',
+    empty: '沒有可匯出的資料'
   }
 }

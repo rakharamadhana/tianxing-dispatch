@@ -1,14 +1,60 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Icon from './Icon.vue'
+import JobMembersModal from './JobMembersModal.vue'
 import { PROJECT_TYPES, isHourlyType, usesMaterials, requiresMaterials, totalFor } from '../config/projectTypes.js'
 import { MATERIAL_PRESETS } from '../config/materials.js'
+import { BRANCH_OPTIONS } from '../config/branches.js'
+import { useAuth } from '../composables/useAuth.js'
 
 const props = defineProps({
   row: { type: Object, required: true },
-  jobs: { type: Object, required: true } // the useJobs() instance
+  jobs: { type: Object, required: true }, // the useJobs() instance
+  workers: { type: Array, default: () => [] }
 })
 const emit = defineEmits(['delete'])
+
+const showMembersModal = ref(false)
+const memberSummary = computed(() => {
+  const ids = props.row.member_ids || []
+  if (!ids.length) return ''
+  const roster = new Map(props.workers.map((w) => [w.id, w]))
+  return ids.map((id) => roster.get(id)?.name).filter(Boolean).join('、')
+})
+function confirmMembers({ memberIds, memberPercentages }) {
+  props.jobs.commitAction(() => {
+    props.row.member_ids = memberIds
+    props.row.member_percentages = memberPercentages
+  })
+  showMembersModal.value = false
+}
+
+const { user } = useAuth()
+
+// row.job_date is stored as 'YYYYMMDD' (no separators) and row.job_time as
+// 'HH:MM' — that's the format the rest of the app (filters, reports, the
+// Supabase sync) relies on. Native date/time inputs need 'YYYY-MM-DD', so
+// these getters/setters translate at the edit boundary instead of changing
+// the stored format everywhere.
+const dateForInput = computed({
+  get() {
+    const s = String(props.row.job_date || '')
+    return /^\d{8}$/.test(s) ? `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}` : ''
+  },
+  set(value) {
+    props.row.job_date = value ? value.replace(/-/g, '') : ''
+  }
+})
+// Only the CEO (headquarters-wide access) can move a row to a different
+// branch — a manager's own RLS access is limited to their single branch.
+const canMoveBranch = computed(() => user.value?.role === 'ceo')
+
+async function moveBranch(newBranch) {
+  if (!newBranch || newBranch === props.row.branch) return
+  props.jobs.commitAction(() => { props.row.branch = newBranch })
+  await props.jobs.flushNow()
+  await props.jobs.load() // the row now belongs to a different branch — drop it from this view
+}
 
 const hourly = computed(() => isHourlyType(props.row.project_type))
 const hasMaterials = computed(() => usesMaterials(props.row.project_type))
@@ -47,12 +93,22 @@ function removeMaterial(index) {
       <select v-model="row.project_type" @focus="jobs.beginEdit()" @change="jobs.commitEdit()">
         <option v-for="t in PROJECT_TYPES" :key="t" :value="t">{{ $t('projectTypes.' + t) }}</option>
       </select>
+      <select
+        v-if="canMoveBranch"
+        class="branch-move-select"
+        :value="row.branch"
+        :disabled="!row.id"
+        :title="row.id ? $t('actions.moveBranch') : $t('actions.moveBranchSaveFirst')"
+        @change="moveBranch($event.target.value)"
+      >
+        <option v-for="b in BRANCH_OPTIONS" :key="b" :value="b">{{ $t('branches.' + b) }}</option>
+      </select>
     </div>
 
     <!-- Date / Time -->
     <div class="cell">
-      <input v-model="row.job_date" :placeholder="$t('fields.date')" maxlength="8" @focus="jobs.beginEdit()" @change="jobs.commitEdit()" />
-      <input v-model="row.job_time" :placeholder="$t('fields.time')" @focus="jobs.beginEdit()" @change="jobs.commitEdit()" />
+      <input v-model="dateForInput" type="date" @focus="jobs.beginEdit()" @change="jobs.commitEdit()" />
+      <input v-model="row.job_time" type="time" @focus="jobs.beginEdit()" @change="jobs.commitEdit()" />
     </div>
 
     <!-- Name / Phone -->
@@ -143,16 +199,41 @@ function removeMaterial(index) {
         >
           {{ $t('payStatus.' + row.payment_status) }}
         </button>
+        <span
+          v-if="row.project_status"
+          class="chip static"
+          :class="row.project_status === 'complete' ? 'paid' : 'unpaid'"
+          :title="$t('status.projectStatusHint')"
+        >
+          {{ $t('status.' + row.project_status) }}
+        </span>
       </div>
     </div>
 
     <!-- Delete -->
     <div class="cell cell-actions">
+      <button
+        class="row-members"
+        :class="{ assigned: memberSummary }"
+        :title="memberSummary || $t('salary.assignWorkers')"
+        @click="showMembersModal = true"
+      >
+        <Icon name="user" :size="14" />
+      </button>
       <button class="row-del" :title="$t('actions.delete')" @click="emit('delete')">
         <Icon name="trash" :size="16" />
       </button>
     </div>
   </div>
+
+  <JobMembersModal
+    v-if="showMembersModal"
+    :workers="workers"
+    :member-ids="row.member_ids"
+    :member-percentages="row.member_percentages"
+    @confirm="confirmMembers"
+    @cancel="showMembersModal = false"
+  />
 
   <!-- Materials used — full-width sub-row, packaging (包材) rows only -->
   <div v-if="hasMaterials" class="material-row" :class="{ invalid: materialsInvalid }">
@@ -180,3 +261,28 @@ function removeMaterial(index) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.cell-actions {
+  gap: 4px;
+}
+.row-members {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.row-members:hover {
+  color: var(--brand-blue);
+  background: rgba(22, 174, 184, 0.1);
+}
+.row-members.assigned {
+  color: var(--brand-blue);
+}
+</style>

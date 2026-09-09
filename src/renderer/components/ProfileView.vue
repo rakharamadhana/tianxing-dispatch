@@ -21,7 +21,7 @@ onMounted(() => {
   }
 })
 
-function saveSettings() {
+async function saveSettings() {
   successMsg.value = ''
   errorMsg.value = ''
 
@@ -43,8 +43,7 @@ function saveSettings() {
     return
   }
 
-  // Update mock credentials
-  const res = updateProfile(email.value, password.value, currentPassword.value)
+  const res = await updateProfile(email.value, password.value, currentPassword.value)
   if (!res.ok) {
     errorMsg.value = res.error
     return

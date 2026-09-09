@@ -1,5 +1,6 @@
 import { ref, computed, toRaw } from 'vue'
 import { requiresMaterials, totalFor } from '../config/projectTypes.js'
+import { ALL_LABEL } from '../config/branches.js'
 
 /** Deep-clone a reactive value into a plain object safe to send over IPC. */
 function plain(value) {
@@ -219,7 +220,13 @@ export function useJobs(initialBranch = '台北') {
       payment_method: r.payment_method ?? '現金',
       payment_status: r.payment_status ?? '未付款',
       note: r.note ?? '',
-      materials: Array.isArray(r.materials) ? r.materials : []
+      materials: Array.isArray(r.materials) ? r.materials : [],
+      member_ids: Array.isArray(r.member_ids) ? r.member_ids : [],
+      member_percentages: r.member_percentages && typeof r.member_percentages === 'object' ? r.member_percentages : {},
+      // Read-only signal from the shared payroll workflow (see
+      // SupabaseJobRepository#computeProjectStatus); null for jobs with no
+      // payroll data attached (e.g. rows created directly in this app).
+      project_status: r.project_status ?? null
     }
   }
 
@@ -229,9 +236,13 @@ export function useJobs(initialBranch = '台北') {
 
   function addRow() {
     const yearPrefill = filters.value.year || '2026'
+    // The All tab has no real branch of its own — a brand-new row needs one
+    // to save against, so default to the first real branch; the CEO can
+    // still move it via the row's own branch selector.
+    const rowBranch = branch.value === ALL_LABEL ? '台北' : branch.value
     commitAction(() => {
       rows.value.push(
-        normalize({ id: '', branch: branch.value, job_date: yearPrefill, quantity: 1 })
+        normalize({ id: '', branch: rowBranch, job_date: `${yearPrefill}0101`, quantity: 1 })
       )
     })
   }

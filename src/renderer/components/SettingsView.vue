@@ -81,9 +81,10 @@ function setRating(val) {
   ratedStars.value = val
 }
 
-function handleConfirmDelete() {
+async function handleConfirmDelete() {
   showDeleteModal.value = false
-  deleteAccount()
+  const res = await deleteAccount()
+  if (!res.ok) errorMsg.value = res.error
 }
 </script>
 
@@ -279,6 +280,7 @@ function handleConfirmDelete() {
         <Icon name="trash" :size="16" />
         <span>{{ $t('profile.deleteAccount') }}</span>
       </button>
+      <p v-if="errorMsg" class="alert error" style="margin-top: var(--s2);">{{ $t('profile.' + errorMsg) }}</p>
     </div>
 
     <!-- Confirmation Modal -->

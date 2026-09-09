@@ -5,7 +5,7 @@ const COLUMNS = [
   'branch', 'project_type', 'job_date', 'job_time', 'customer_name', 'phone',
   'move_in_address', 'move_out_address', 'unit_price', 'tax_status',
   'quantity', 'worker_count', 'total_price', 'payment_method', 'payment_status', 'note',
-  'materials', 'sort_order', 'created_at', 'updated_at'
+  'materials', 'member_ids', 'member_percentages', 'sort_order', 'created_at', 'updated_at'
 ]
 
 const HOURLY_TYPES = ['包材', '時薪']
@@ -19,7 +19,13 @@ function totalFor(record) {
 
 /** Convert a DB row to the wire shape (id as string, materials parsed to an array). */
 function toJob(row) {
-  return { ...row, id: String(row.id), materials: JSON.parse(row.materials || '[]') }
+  return {
+    ...row,
+    id: String(row.id),
+    materials: JSON.parse(row.materials || '[]'),
+    member_ids: JSON.parse(row.member_ids || '[]'),
+    member_percentages: JSON.parse(row.member_percentages || '{}')
+  }
 }
 
 export class SqliteJobRepository extends JobRepository {
@@ -77,7 +83,8 @@ export class SqliteJobRepository extends JobRepository {
         move_in_address=@move_in_address, move_out_address=@move_out_address,
         unit_price=@unit_price, tax_status=@tax_status, quantity=@quantity,
         worker_count=@worker_count, total_price=@total_price, payment_method=@payment_method,
-        payment_status=@payment_status, note=@note, materials=@materials, sort_order=@sort_order,
+        payment_status=@payment_status, note=@note, materials=@materials,
+        member_ids=@member_ids, member_percentages=@member_percentages, sort_order=@sort_order,
         updated_at=@updated_at
       WHERE id=@id
     `)
@@ -107,6 +114,8 @@ export class SqliteJobRepository extends JobRepository {
           payment_status: r.payment_status || '未付款',
           note: r.note || '',
           materials: JSON.stringify(Array.isArray(r.materials) ? r.materials : []),
+          member_ids: JSON.stringify(Array.isArray(r.member_ids) ? r.member_ids : []),
+          member_percentages: JSON.stringify(r.member_percentages && typeof r.member_percentages === 'object' ? r.member_percentages : {}),
           sort_order: index,
           updated_at: now
         }

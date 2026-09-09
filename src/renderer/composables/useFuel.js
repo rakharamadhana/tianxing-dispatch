@@ -12,12 +12,12 @@ function newKey() {
 const AUTOSAVE_DELAY = 500
 
 /**
- * Owns vehicle-maintenance-request state for the active branch: loading,
- * in-memory edits (status changes, a manager-created request), and
- * autosave. Backed by Supabase's `maintenance_requests` — the same table
- * the driver mobile app reads and writes. Mirrors useFuel.js.
+ * Owns fuel-request state for the active branch: loading, in-memory edits
+ * (status changes, a manager-created request), and autosave. Backed by
+ * Supabase's `gasoline_requests` — the same table the driver mobile app
+ * reads and writes. Mirrors useMaintenance.js.
  */
-export function useMaintenance(initialBranch) {
+export function useFuel(initialBranch) {
   const branch = ref(initialBranch)
   const rows = ref([])
   const loading = ref(false)
@@ -37,10 +37,8 @@ export function useMaintenance(initialBranch) {
       branch: r.branch ?? branch.value,
       driver_id: r.driver_id ?? '',
       driver_name: r.driver_name ?? '',
-      amount: Number(r.amount) || 0,
-      address: r.address ?? '',
-      note: r.note ?? '',
-      receipt_url: r.receipt_url ?? '',
+      reported_amount: Number(r.reported_amount) || 0,
+      approved_amount: Number(r.approved_amount) || 0,
       status: r.status ?? 'pending',
       created_at: r.created_at ?? ''
     }
@@ -76,7 +74,7 @@ export function useMaintenance(initialBranch) {
     saving.value = true
     const branchAtStart = branch.value
     try {
-      const persisted = await window.api.maintenance.save(branch.value, {
+      const persisted = await window.api.fuel.save(branch.value, {
         rows: rows.value.map((r) => plain(r))
       })
       if (branch.value === branchAtStart) mergeIds(persisted)
@@ -95,7 +93,7 @@ export function useMaintenance(initialBranch) {
     await flushNow()
     loading.value = true
     try {
-      const data = await window.api.maintenance.list(branch.value)
+      const data = await window.api.fuel.list(branch.value)
       rows.value = data.map(normalize)
       savePending.value = false
     } finally {

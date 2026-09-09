@@ -3,22 +3,19 @@ import { computed, ref, watch } from 'vue'
 import Icon from './Icon.vue'
 import MonthPickerModal from './MonthPickerModal.vue'
 import { useDrivers } from '../composables/useDrivers.js'
-import {
-  downloadMonthlyMaintenanceReport,
-  downloadYearlyMaintenanceReport
-} from '../utils/maintenanceReport.js'
+import { downloadMonthlyFuelReport, downloadYearlyFuelReport } from '../utils/fuelReport.js'
 
 const props = defineProps({
-  maintenance: { type: Object, required: true } // the useMaintenance() instance
+  fuel: { type: Object, required: true } // the useFuel() instance
 })
 const emit = defineEmits(['back'])
 
-const { drivers, load: loadDrivers } = useDrivers(props.maintenance.branch.value)
-watch(() => props.maintenance.branch.value, loadDrivers)
+const { drivers, load: loadDrivers } = useDrivers(props.fuel.branch.value)
+watch(() => props.fuel.branch.value, loadDrivers)
 
 const availableYears = computed(() => {
   const years = new Set(
-    props.maintenance.rows.value
+    props.fuel.rows.value
       .map((r) => Number(String(r.created_at || '').slice(0, 4)))
       .filter((y) => Number.isInteger(y) && y > 2000)
   )
@@ -45,16 +42,16 @@ async function confirmSummaryDownload({ year, month }) {
   exportError.value = ''
   exporting.value = true
   try {
-    await downloadMonthlyMaintenanceReport({
-      records: props.maintenance.rows.value,
-      branch: props.maintenance.branch.value,
+    await downloadMonthlyFuelReport({
+      records: props.fuel.rows.value,
+      branch: props.fuel.branch.value,
       year,
       month,
-      filename: `${props.maintenance.branch.value}-${year}-${month}-保養總表.xlsx`
+      filename: `${props.fuel.branch.value}-${year}-${month}-油資總表.xlsx`
     })
     showMonthPicker.value = false
   } catch (e) {
-    console.error('Maintenance summary export failed', e)
+    console.error('Fuel summary export failed', e)
     exportError.value = 'error'
   } finally {
     exporting.value = false
@@ -65,15 +62,15 @@ async function confirmFullSummaryDownload({ year }) {
   exportError.value = ''
   exporting.value = true
   try {
-    await downloadYearlyMaintenanceReport({
-      records: props.maintenance.rows.value,
-      branch: props.maintenance.branch.value,
+    await downloadYearlyFuelReport({
+      records: props.fuel.rows.value,
+      branch: props.fuel.branch.value,
       year,
-      filename: `${props.maintenance.branch.value}-${year}-全總表.xlsx`
+      filename: `${props.fuel.branch.value}-${year}-全總表.xlsx`
     })
     showYearPicker.value = false
   } catch (e) {
-    console.error('Maintenance full summary export failed', e)
+    console.error('Fuel full summary export failed', e)
     exportError.value = 'error'
   } finally {
     exporting.value = false
@@ -87,11 +84,11 @@ function onDriverPicked(row, driverId) {
   // From the All tab there's no single active branch to save the new
   // request under, so use the picked driver's own branch instead.
   if (driver) row.branch = driver.branch
-  props.maintenance.commitEdit()
+  props.fuel.commitEdit()
 }
 
 function setStatus(row, status) {
-  props.maintenance.commitAction(() => { row.status = status })
+  props.fuel.commitAction(() => { row.status = status })
 }
 
 function formatDate(value) {
@@ -104,18 +101,18 @@ function formatDate(value) {
     <div class="profile-header">
       <button class="btn ghost back-btn" @click="emit('back')">
         <Icon name="chevron-left" :size="16" />
-        <span>{{ $t('maintenance.back') }}</span>
+        <span>{{ $t('fuel.back') }}</span>
       </button>
-      <h1 class="profile-title">{{ $t('maintenance.title') }}</h1>
+      <h1 class="profile-title">{{ $t('fuel.title') }}</h1>
     </div>
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <button class="btn" @click="maintenance.addRow()">
+      <button class="btn" @click="fuel.addRow()">
         <Icon name="add" :size="16" /><span>{{ $t('actions.addRow') }}</span>
       </button>
 
-      <span v-if="maintenance.saving.value || maintenance.dirty.value" class="dirty-flag">
+      <span v-if="fuel.saving.value || fuel.dirty.value" class="dirty-flag">
         <span class="dot"></span>{{ $t('status.saving') }}
       </span>
       <span v-else class="saved-flag">
@@ -135,69 +132,47 @@ function formatDate(value) {
       </span>
     </div>
 
-    <div class="card maintenance-grid">
+    <div class="card maintenance-grid fuel-grid">
       <div class="grid-head">
-        <div class="h">{{ $t('maintenance.columns.dateTime') }}</div>
-        <div class="h">{{ $t('maintenance.columns.driverName') }}</div>
-        <div class="h">{{ $t('maintenance.columns.address') }}</div>
-        <div class="h">{{ $t('maintenance.columns.amount') }}</div>
-        <div class="h">{{ $t('maintenance.columns.note') }}</div>
-        <div class="h">{{ $t('maintenance.columns.receipt') }}</div>
-        <div class="h">{{ $t('maintenance.columns.status') }}</div>
+        <div class="h">{{ $t('fuel.columns.dateTime') }}</div>
+        <div class="h">{{ $t('fuel.columns.driverName') }}</div>
+        <div class="h">{{ $t('fuel.columns.reportedAmount') }}</div>
+        <div class="h">{{ $t('fuel.columns.approvedAmount') }}</div>
+        <div class="h">{{ $t('fuel.columns.status') }}</div>
         <div class="h"></div>
       </div>
 
-      <div v-if="maintenance.rows.value.length === 0" class="empty-state">
+      <div v-if="fuel.rows.value.length === 0" class="empty-state">
         {{ $t('status.empty') }}
       </div>
 
-      <div v-for="(row, i) in maintenance.rows.value" :key="row._key" class="job-row">
+      <div v-for="(row, i) in fuel.rows.value" :key="row._key" class="job-row">
         <div class="cell cell-muted">{{ formatDate(row.created_at) || '—' }}</div>
 
         <div class="cell">
           <span v-if="row.id">{{ row.driver_name }}</span>
           <select v-else :value="row.driver_id" @change="onDriverPicked(row, $event.target.value)">
-            <option value="" disabled>{{ $t('maintenance.fields.selectDriver') }}</option>
+            <option value="" disabled>{{ $t('fuel.fields.selectDriver') }}</option>
             <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
           </select>
         </div>
 
-        <div class="cell">
+        <div class="cell cell-amount">
           <input
-            v-model="row.address"
-            :placeholder="$t('maintenance.fields.address')"
-            @change="maintenance.commitEdit()"
+            v-model.number="row.reported_amount"
+            type="number"
+            min="0"
+            @change="fuel.commitEdit()"
           />
         </div>
 
         <div class="cell cell-amount">
           <input
-            v-model.number="row.amount"
+            v-model.number="row.approved_amount"
             type="number"
             min="0"
-            @change="maintenance.commitEdit()"
+            @change="fuel.commitEdit()"
           />
-        </div>
-
-        <div class="cell">
-          <input
-            v-model="row.note"
-            :placeholder="$t('maintenance.fields.note')"
-            @change="maintenance.commitEdit()"
-          />
-        </div>
-
-        <div class="cell">
-          <a
-            v-if="row.receipt_url"
-            class="receipt-link"
-            :href="row.receipt_url"
-            target="_blank"
-            rel="noopener"
-          >
-            <Icon name="summary" :size="14" /><span>{{ $t('maintenance.receiptLink') }}</span>
-          </a>
-          <span v-else class="cell-muted">{{ $t('maintenance.noReceipt') }}</span>
         </div>
 
         <div class="cell status-cell">
@@ -221,7 +196,7 @@ function formatDate(value) {
             v-if="!row.id"
             class="row-del"
             :title="$t('actions.delete')"
-            @click="maintenance.removeRow(i)"
+            @click="fuel.removeRow(i)"
           >
             <Icon name="trash" :size="16" />
           </button>
@@ -246,11 +221,11 @@ function formatDate(value) {
 </template>
 
 <style scoped>
-.maintenance-grid .grid-head,
-.maintenance-grid .job-row {
-  grid-template-columns: 120px 130px 1fr 90px 1fr 128px 180px 40px;
+.fuel-grid .grid-head,
+.fuel-grid .job-row {
+  grid-template-columns: 130px 160px 150px 150px 170px 40px;
 }
-.maintenance-grid .cell-amount input {
+.fuel-grid .cell-amount input {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -265,36 +240,19 @@ function formatDate(value) {
   padding: 4px 8px;
   font-size: 11px;
 }
-.receipt-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  white-space: nowrap;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--brand-blue);
-  background: rgba(22, 174, 184, 0.1);
-  border-radius: 20px;
-  padding: 6px 10px;
-  text-decoration: none;
-}
-.receipt-link:hover {
-  background: rgba(22, 174, 184, 0.18);
-}
 
 @media (max-width: 980px) {
-  .maintenance-grid .job-row {
+  .fuel-grid .job-row {
     grid-template-columns: 1fr;
     padding: var(--s2) var(--cell-px);
     row-gap: 10px;
   }
-  .maintenance-grid .status-cell {
+  .fuel-grid .status-cell {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
   }
-  .maintenance-grid .cell-actions {
+  .fuel-grid .cell-actions {
     align-items: flex-end;
   }
 }
