@@ -214,14 +214,23 @@ export default {
     noWorkers: '此分公司尚無工作人員',
     noRecords: '目前尚無薪資紀錄。',
     columns: {
+      date: '日期 / 時間',
       worker: '人員',
       role: '職位',
+      project: '項目',
       amount: '金額'
     },
     roles: {
       manager: '管理員',
       driver: '司機',
       assistant: '助理'
+    },
+    filters: {
+      searchProject: '搜尋項目',
+      worker: '人員',
+      allWorkers: '全部人員',
+      from: '起始日',
+      to: '結束日'
     }
   },
   fuel: {

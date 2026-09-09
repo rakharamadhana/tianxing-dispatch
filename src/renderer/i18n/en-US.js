@@ -214,14 +214,23 @@ export default {
     noWorkers: 'No workers in this branch yet',
     noRecords: 'No payroll records yet.',
     columns: {
+      date: 'Date / Time',
       worker: 'Worker',
       role: 'Role',
+      project: 'Project',
       amount: 'Amount'
     },
     roles: {
       manager: 'Manager',
       driver: 'Driver',
       assistant: 'Assistant'
+    },
+    filters: {
+      searchProject: 'Search project',
+      worker: 'Worker',
+      allWorkers: 'All workers',
+      from: 'From',
+      to: 'To'
     }
   },
   fuel: {

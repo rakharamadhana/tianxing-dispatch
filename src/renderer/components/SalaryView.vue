@@ -19,19 +19,78 @@ watch(() => props.jobs.branch.value, loadWorkers)
 
 const workerRoster = computed(() => Object.fromEntries(workers.value.map((w) => [w.id, w])))
 
+/** 'YYYYMMDD' -> 'YYYY-MM-DD' (or '' if it doesn't parse) */
+function isoDate(jobDate) {
+  const d = String(jobDate || '')
+  return /^\d{8}$/.test(d) ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : ''
+}
+
+/** 'YYYYMMDD' + 'HH:MM' -> 'YYYY-MM-DD HH:MM' (falls back to just the date, or '' if neither parses) */
+function formatJobDateTime(job) {
+  const date = isoDate(job.job_date)
+  if (!date) return ''
+  const time = String(job.job_time || '')
+  return /^\d{2}:\d{2}/.test(time) ? `${date} ${time.slice(0, 5)}` : date
+}
+
+/** Mirrors salaryReport.js#jobLabel — customer name if set, else the service type. */
+function jobLabel(job) {
+  return job.customer_name || job.project_type || ''
+}
+
 const allPayouts = computed(() => {
   const list = []
   props.jobs.rows.value
     .filter((job) => job.member_ids?.length)
     .forEach((job) => {
+      const dateTime = formatJobDateTime(job)
+      const project = jobLabel(job)
       payroll(job, workerRoster.value).rows.forEach((row) => {
-        list.push({ workerId: row.id, name: row.name, role: row.role, amount: row.takeHome })
+        list.push({
+          workerId: row.id,
+          name: row.name,
+          role: row.role,
+          amount: row.takeHome,
+          jobDate: job.job_date || '',
+          jobDateIso: isoDate(job.job_date),
+          dateTime,
+          project
+        })
       })
     })
   return list
 })
 
-const sortField = ref('total')
+const filterWorker = ref('')
+const filterProject = ref('')
+const filterFrom = ref('')
+const filterTo = ref('')
+
+const workerOptions = computed(() => {
+  const seen = new Map()
+  allPayouts.value.forEach((p) => { if (!seen.has(p.workerId)) seen.set(p.workerId, p.name) })
+  return [...seen.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+})
+
+function clearFilters() {
+  filterWorker.value = ''
+  filterProject.value = ''
+  filterFrom.value = ''
+  filterTo.value = ''
+}
+
+const filteredPayouts = computed(() => {
+  const project = filterProject.value.trim().toLowerCase()
+  return allPayouts.value.filter((p) => {
+    if (filterWorker.value && p.workerId !== filterWorker.value) return false
+    if (project && !p.project.toLowerCase().includes(project)) return false
+    if (filterFrom.value && (!p.jobDateIso || p.jobDateIso < filterFrom.value)) return false
+    if (filterTo.value && (!p.jobDateIso || p.jobDateIso > filterTo.value)) return false
+    return true
+  })
+})
+
+const sortField = ref('date')
 const sortDir = ref('desc')
 
 function toggleSort(field) {
@@ -49,24 +108,18 @@ function sortIndicator(field) {
 }
 
 const rows = computed(() => {
-  const totals = new Map()
-  allPayouts.value.forEach((payout) => {
-    if (!totals.has(payout.workerId)) {
-      totals.set(payout.workerId, { id: payout.workerId, name: payout.name, role: payout.role, total: 0 })
-    }
-    totals.get(payout.workerId).total += payout.amount
-  })
-
   const field = sortField.value
   const dir = sortDir.value === 'asc' ? 1 : -1
-  return [...totals.values()].sort((a, b) => {
+  return [...filteredPayouts.value].sort((a, b) => {
     if (field === 'name') return a.name.localeCompare(b.name) * dir
     if (field === 'role') return a.role.localeCompare(b.role) * dir
-    return (a.total - b.total) * dir
+    if (field === 'project') return a.project.localeCompare(b.project) * dir
+    if (field === 'date') return a.jobDate.localeCompare(b.jobDate) * dir
+    return (a.amount - b.amount) * dir
   })
 })
 
-const totalSalary = computed(() => rows.value.reduce((sum, row) => sum + row.total, 0))
+const totalSalary = computed(() => filteredPayouts.value.reduce((sum, payout) => sum + payout.amount, 0))
 
 function money(value) {
   return Math.round(Number(value) || 0).toLocaleString()
@@ -158,21 +211,50 @@ async function confirmFullSummaryDownload({ year }) {
       </span>
     </div>
 
+    <div class="filterbar">
+      <div class="search-field">
+        <Icon name="search" :size="15" />
+        <input v-model="filterProject" :placeholder="$t('salary.filters.searchProject')" />
+      </div>
+
+      <span class="filter-group">
+        <span class="filter-label">{{ $t('salary.filters.worker') }}</span>
+        <select v-model="filterWorker" class="select-input">
+          <option value="">{{ $t('salary.filters.allWorkers') }}</option>
+          <option v-for="w in workerOptions" :key="w.id" :value="w.id">{{ w.name }}</option>
+        </select>
+      </span>
+
+      <span class="filter-group">
+        <span class="filter-label">{{ $t('salary.filters.from') }}</span>
+        <input v-model="filterFrom" type="date" />
+        <span class="filter-label">{{ $t('salary.filters.to') }}</span>
+        <input v-model="filterTo" type="date" />
+      </span>
+
+      <span class="grow"></span>
+      <button class="btn small" @click="clearFilters">{{ $t('filters.clear') }}</button>
+    </div>
+
     <div class="card salary-grid">
       <div class="grid-head">
+        <div class="h sortable" @click="toggleSort('date')">{{ $t('salary.columns.date') }} {{ sortIndicator('date') }}</div>
         <div class="h sortable" @click="toggleSort('name')">{{ $t('salary.columns.worker') }} {{ sortIndicator('name') }}</div>
         <div class="h sortable" @click="toggleSort('role')">{{ $t('salary.columns.role') }} {{ sortIndicator('role') }}</div>
-        <div class="h sortable" @click="toggleSort('total')">{{ $t('salary.columns.amount') }} {{ sortIndicator('total') }}</div>
+        <div class="h sortable" @click="toggleSort('project')">{{ $t('salary.columns.project') }} {{ sortIndicator('project') }}</div>
+        <div class="h sortable" @click="toggleSort('amount')">{{ $t('salary.columns.amount') }} {{ sortIndicator('amount') }}</div>
       </div>
 
       <div v-if="!rows.length" class="empty-state">
         {{ $t('salary.noRecords') }}
       </div>
 
-      <div v-for="row in rows" :key="row.id" class="job-row">
+      <div v-for="(row, i) in rows" :key="`${row.workerId}-${row.jobDate}-${i}`" class="job-row">
+        <div class="cell">{{ row.dateTime || '—' }}</div>
         <div class="cell">{{ row.name }}</div>
         <div class="cell">{{ $t('salary.roles.' + row.role) }}</div>
-        <div class="cell cell-amount">{{ money(row.total) }}</div>
+        <div class="cell">{{ row.project || '—' }}</div>
+        <div class="cell cell-amount">{{ money(row.amount) }}</div>
       </div>
     </div>
 
@@ -205,7 +287,18 @@ async function confirmFullSummaryDownload({ year }) {
 }
 .salary-grid .grid-head,
 .salary-grid .job-row {
-  grid-template-columns: 1fr 120px 140px;
+  grid-template-columns: 150px 1fr 100px 1fr 140px;
+}
+.filterbar select,
+.filterbar input[type='date'] {
+  min-height: var(--control-h);
+  border: 1px solid #cbd7e5;
+  border-radius: 5px;
+  padding: 0 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
 }
 .h.sortable {
   cursor: pointer;
