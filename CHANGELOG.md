@@ -16,6 +16,37 @@ Group changes under: **Added**, **Changed**, **Fixed**, **Removed**.
 
 ## [Unreleased]
 
+## [0.2.0-beta.1] - 2026-09-19
+
+### Added
+- **Supabase Backend**: Migrated jobs, auth, and driver profiles onto a shared Supabase
+  Postgres backend (`projects` table) with real Row-Level-Security-based access control,
+  replacing the local-only SQLite store (kept as a fallback).
+- **Fuel & Maintenance Requests**: New branch-scoped request screens (driver-submitted,
+  manager-approved), backed by Supabase (`gasoline_requests` / `maintenance_requests`).
+- **Worker Salary / Payroll**: Jobs can now have named workers assigned with a
+  commission %. New Salary view with one row per job payout, filterable by worker,
+  project, and date range.
+- **Hourly & Packaging job types**: New 時薪 (hourly) and 包材 (packaging, with a
+  material list) project types alongside 搬工, with worker-count-aware totals.
+- **Income Statement Export**: "Full Summary" export now clones the shared xlsx
+  template per month, with a branch-aware yearly Revenue/Cost summary that rolls up
+  Fuel and Maintenance costs.
+
+### Fixed
+- **CEO branch access**: The CEO account could only ever see its own branch —
+  `'headquarters'` was never a valid database value, so the check silently failed.
+  CEO detection now uses a real `ceo` role, and the CEO can read/write all three
+  branches.
+- **Ghost button contrast**: Several buttons (back navigation, approve/reject) used a
+  button style meant for the dark header bar, making them nearly invisible on white
+  backgrounds. Fixed contrast, and stopped the status chip from stretching across its
+  column instead of hugging its own text.
+
+### Removed
+- **"Headquarters" branch**: Dropped the unused/broken `總公司` pseudo-branch; branch
+  assignment is now strictly Taipei / Hsinchu / Kaohsiung.
+
 ## [0.1.4] - 2026-07-10
 
 ### Added
