@@ -1,5 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from './supabaseClient.js'
-import { branchesForEnum } from './branchMap.js'
+import { ALL_BRANCHES, ALL_LABEL, branchesForEnum } from './branchMap.js'
 
 /**
  * Real Supabase Auth, replacing the old front-end-only demo login.
@@ -13,12 +13,12 @@ async function fetchProfile(supabase, userId) {
 }
 
 function toAuthUser(authUser, profile) {
-  const isCeo = profile?.role === 'manager' && profile?.branch === 'headquarters'
+  const isCeo = profile?.role === 'ceo'
   return {
     email: authUser.email,
     role: isCeo ? 'ceo' : profile?.role || 'manager',
     label: profile?.name || authUser.email,
-    branches: branchesForEnum(profile?.branch)
+    branches: isCeo ? [ALL_LABEL, ...ALL_BRANCHES] : branchesForEnum(profile?.branch)
   }
 }
 

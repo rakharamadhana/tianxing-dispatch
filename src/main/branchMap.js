@@ -1,19 +1,18 @@
 /**
  * Maps between the app's Chinese branch labels (used everywhere in the UI
  * and the local SQLite `jobs` table) and Supabase's `branch_type` Postgres
- * enum (headquarters | taipei | hsinchu | kaohsiung).
+ * enum (taipei | hsinchu | kaohsiung).
  */
 
 export const ALL_BRANCHES = ['台北', '新竹', '高雄']
-export const HEADQUARTERS_LABEL = '總公司'
-// Pseudo-branch: the CEO's combined view across every real branch plus
-// headquarters-only rows. Not a real `branch_type` enum value — never sent
-// to Supabase as a row's own branch, only used to select the "show everything" query.
+// Pseudo-branch: the CEO's combined view across every real branch. Not a
+// real `branch_type` enum value — never sent to Supabase as a row's own
+// branch, only used to select the "show everything" query.
 export const ALL_LABEL = '全部'
-export const ALL_BRANCH_ENUMS = ['taipei', 'hsinchu', 'kaohsiung', 'headquarters']
+export const ALL_BRANCH_ENUMS = ['taipei', 'hsinchu', 'kaohsiung']
 
-const LABEL_TO_ENUM = { 台北: 'taipei', 新竹: 'hsinchu', 高雄: 'kaohsiung', 總公司: 'headquarters' }
-const ENUM_TO_LABEL = { taipei: '台北', hsinchu: '新竹', kaohsiung: '高雄', headquarters: '總公司' }
+const LABEL_TO_ENUM = { 台北: 'taipei', 新竹: 'hsinchu', 高雄: 'kaohsiung' }
+const ENUM_TO_LABEL = { taipei: '台北', hsinchu: '新竹', kaohsiung: '高雄' }
 
 export function labelToEnum(label) {
   return LABEL_TO_ENUM[label] || null
@@ -24,14 +23,11 @@ export function enumToLabel(value) {
 }
 
 /**
- * CEO (branch = 'headquarters') sees a combined "All" tab (every dispatch
- * branch plus headquarters-only rows) alongside each individual branch tab;
- * a manager sees just their single branch. Only a headquarters user's RLS
- * grants read access to headquarters rows, so those rows are only ever
- * visible via the All tab — headquarters never gets a tab of its own.
+ * A manager sees just their single branch. The CEO (role = 'ceo') instead
+ * gets a combined "All" tab across every branch — see auth.js, which
+ * decides branches based on role rather than calling this for a CEO.
  */
 export function branchesForEnum(value) {
-  if (value === 'headquarters' || !value) return [ALL_LABEL, ...ALL_BRANCHES]
   const label = enumToLabel(value)
   return label ? [label] : []
 }

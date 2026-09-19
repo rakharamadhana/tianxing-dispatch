@@ -5,7 +5,7 @@ import { labelToEnum, enumToLabel, ALL_LABEL } from '../branchMap.js'
  * Read-only lookups against Supabase's `profiles` table — used to populate
  * the driver picker when a manager creates a fuel/maintenance request on a
  * driver's behalf. RLS already scopes what's visible: a branch manager sees
- * only their branch's profiles, headquarters (CEO) sees all.
+ * only their branch's profiles, the CEO sees all.
  */
 export class SupabaseProfileRepository {
   async listDrivers(branch) {
@@ -15,7 +15,7 @@ export class SupabaseProfileRepository {
     if (!branchEnum && branch !== ALL_LABEL) return []
 
     let query = supabase.from('profiles').select('id, name, email, branch').eq('role', 'driver')
-    if (branchEnum && branchEnum !== 'headquarters') query = query.eq('branch', branchEnum)
+    if (branchEnum) query = query.eq('branch', branchEnum)
 
     const { data, error } = await query.order('name', { ascending: true })
     if (error) {
@@ -41,7 +41,7 @@ export class SupabaseProfileRepository {
     if (!branchEnum && branch !== ALL_LABEL) return []
 
     let query = supabase.from('profiles').select('id, name, email, role, branch')
-    if (branchEnum && branchEnum !== 'headquarters') query = query.eq('branch', branchEnum)
+    if (branchEnum) query = query.eq('branch', branchEnum)
 
     const { data, error } = await query.order('name', { ascending: true })
     if (error) {

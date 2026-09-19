@@ -8,8 +8,7 @@ export default {
     全部: 'All',
     台北: 'Taipei',
     新竹: 'Hsinchu',
-    高雄: 'Kaohsiung',
-    總公司: 'Headquarters'
+    高雄: 'Kaohsiung'
   },
   projectTypes: {
     搬工: 'Moving',

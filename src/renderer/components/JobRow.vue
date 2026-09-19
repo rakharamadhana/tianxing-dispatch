@@ -45,8 +45,8 @@ const dateForInput = computed({
     props.row.job_date = value ? value.replace(/-/g, '') : ''
   }
 })
-// Only the CEO (headquarters-wide access) can move a row to a different
-// branch — a manager's own RLS access is limited to their single branch.
+// Only the CEO (all-branch access) can move a row to a different branch —
+// a manager's own RLS access is limited to their single branch.
 const canMoveBranch = computed(() => user.value?.role === 'ceo')
 
 async function moveBranch(newBranch) {
