@@ -91,7 +91,7 @@ async function handleConfirmDelete() {
 <template>
   <div class="content profile-page">
     <div class="profile-header">
-      <button class="btn ghost back-btn" @click="emit('back')">
+      <button class="btn back-btn" @click="emit('back')">
         <Icon name="chevron-left" :size="16" />
         <span>{{ $t('profile.back') }}</span>
       </button>

@@ -186,7 +186,7 @@ async function confirmFullSummaryDownload({ year }) {
 <template>
   <div class="content">
     <div class="profile-header">
-      <button class="btn ghost back-btn" @click="emit('back')">
+      <button class="btn back-btn" @click="emit('back')">
         <Icon name="chevron-left" :size="16" />
         <span>{{ $t('salary.back') }}</span>
       </button>

@@ -102,7 +102,7 @@ function formatDate(value) {
 <template>
   <div class="content">
     <div class="profile-header">
-      <button class="btn ghost back-btn" @click="emit('back')">
+      <button class="btn back-btn" @click="emit('back')">
         <Icon name="chevron-left" :size="16" />
         <span>{{ $t('maintenance.back') }}</span>
       </button>
@@ -204,12 +204,12 @@ function formatDate(value) {
           <span class="chip static" :class="row.status">{{ $t('requestStatus.' + row.status) }}</span>
           <div class="status-actions">
             <button
-              class="btn ghost tiny"
+              class="btn tiny success"
               :disabled="row.status === 'approved'"
               @click="setStatus(row, 'approved')"
             >{{ $t('actions.approve') }}</button>
             <button
-              class="btn ghost tiny"
+              class="btn tiny reject"
               :disabled="row.status === 'rejected'"
               @click="setStatus(row, 'rejected')"
             >{{ $t('actions.reject') }}</button>
@@ -256,14 +256,32 @@ function formatDate(value) {
 }
 .status-cell {
   gap: 4px;
+  align-items: flex-start;
 }
 .status-actions {
   display: flex;
   gap: 4px;
 }
-.btn.ghost.tiny {
+.btn.tiny {
   padding: 4px 8px;
   font-size: 11px;
+  min-height: 0;
+}
+.btn.success {
+  border-color: var(--status-complete-fg);
+  background: var(--status-complete-fg);
+  color: #fff;
+}
+.btn.success:hover:not(:disabled) {
+  filter: brightness(0.93);
+  background: var(--status-complete-fg);
+}
+.btn.reject {
+  border-color: var(--brand-red);
+  color: var(--brand-red);
+}
+.btn.reject:hover:not(:disabled) {
+  background: #fdecea;
 }
 .receipt-link {
   display: inline-flex;
